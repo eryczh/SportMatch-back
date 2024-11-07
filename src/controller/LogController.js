@@ -4,14 +4,24 @@ import { salvarLog, listarLogs } from "../repository/LogRepository.js";
 const router = Router();
 
 router.post('/log', async (req, resp) => {
-  const log = req.body;
-  const novoLog = await salvarLog(log);
-  resp.send(novoLog);
+  try {
+    const log = req.body;
+    const novolog = await salvarLog(log);
+    resp.status(201).send(novolog);
+  } catch (error) {
+    console.error("Erro ao salvar log:", error);
+    resp.status(500).send({ message: "Erro ao salvar log. Tente novamente mais tarde."});
+  }
 });
 
 router.get('/log', async (req, resp) => {
-  const logs = await listarLogs();
-  resp.send(logs);
+  try {
+    const logs = await listarLogs();
+    resp.status(200).send(logs);
+  } catch (error) {
+    console.error("Erro ao listar logs:", error);
+    resp.status(500).send({message: "Erro ao listar logs. tenta novamente mais tarde."});
+  }
 });
 
 export default router;
