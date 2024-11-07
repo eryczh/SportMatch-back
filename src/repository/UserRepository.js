@@ -1,58 +1,44 @@
-import con from './con';
+import con from "./connection.js";
 
-class UserRepository {
-    async findById(id) {
-        const [rows] = await con.execute(
-            'SELECT * FROM tb_usuarios WHERE id_usuario = ?',
-            [id]
-        );
-        return rows[0];
-    }
+export async function salvarUsuario(usuario) {
+  const comando = `
+    INSERT INTO tb_usuarios (id_login, nome, cpf, data_nascimento, estado, cidade, email, endereco, instagram, esportes_favoritos, foto_perfil)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
 
-    async findByLoginId(id_login) {
-        const [rows] = await con.execute(
-            'SELECT * FROM tb_usuarios WHERE id_login = ?',
-            [id_login]
-        );
-        return rows[0];
-    }
+  const [result] = await con.query(comando, [
+    usuario.idLogin, usuario.nome, usuario.cpf, usuario.dataNascimento,
+    usuario.estado, usuario.cidade, usuario.email, usuario.endereco,
+    usuario.instagram, usuario.esportesFavoritos, usuario.fotoPerfil
+  ]);
 
-    async createUser(user) {
-        const { id_login, nome, cpf, data_nascimento, estado, cidade, email, endereco, instagram, esportes_favoritos, foto_perfil } = user;
-        const [result] = await con.execute(
-            'INSERT INTO tb_usuarios (id_login, nome, cpf, data_nascimento, estado, cidade, email, endereco, instagram, esportes_favoritos, foto_perfil) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [id_login, nome, cpf, data_nascimento, estado, cidade, email, endereco, instagram, esportes_favoritos, foto_perfil]
-        );
-        return result.insertId;
-    }
-
-    async updateUser(id, user) {
-        const { nome, cpf, data_nascimento, estado, cidade, email, endereco, instagram, esportes_favoritos, foto_perfil } = user;
-        const [result] = await con.execute(
-            `UPDATE tb_usuarios SET 
-                nome = ?, 
-                cpf = ?, 
-                data_nascimento = ?, 
-                estado = ?, 
-                cidade = ?, 
-                email = ?, 
-                endereco = ?, 
-                instagram = ?, 
-                esportes_favoritos = ?, 
-                foto_perfil = ?
-            WHERE id_usuario = ?`,
-            [nome, cpf, data_nascimento, estado, cidade, email, endereco, instagram, esportes_favoritos, foto_perfil, id]
-        );
-        return result.affectedRows;
-    }
-
-    async deleteUser(id) {
-        const [result] = await con.execute(
-            'DELETE FROM tb_usuarios WHERE id_usuario = ?',
-            [id]
-        );
-        return result.affectedRows;
-    }
+  usuario.id = result.insertId;
+  return usuario;
 }
 
-export default new UserRepository();
+export async function listarUsuarios() {
+  const comando = `
+    SELECT 
+      id_usuario AS id, nome, cpf, data_nascimento AS dataNascimento,
+      estado, cidade, email, endereco, instagram, esportes_favoritos AS esportesFavoritos,
+      foto_perfil AS fotoPerfil
+    FROM tb_usuarios
+  `;
+
+  const [linhas] = await con.query(comando);
+  return linhas;
+}
+
+export async function buscarUsuarioPorId(id) {
+  const comando = `
+    SELECT 
+      id_usuario AS id, nome, cpf, data_nascimento AS dataNascimento,
+      estado, cidade, email, endereco, instagram, esportes_favoritos AS esportesFavoritos,
+      foto_perfil AS fotoPerfil
+    FROM tb_usuarios
+    WHERE id_usuario = ?
+  `;
+
+  const [linhas] = await con.query(comando, [id]);
+  return linhas[0];
+}

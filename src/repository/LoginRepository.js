@@ -1,29 +1,32 @@
-import con from './con';
+import con from "./connection.js";
 
-class LoginRepository {
-    async findByUsername(username) {
-        const [rows] = await con.execute(
-            'SELECT * FROM tb_login WHERE usuario = ?',
-            [username]
-        );
-        return rows[0];
-    }
-
-    async validateUser(username, password) {
-        const [rows] = await con.execute(
-            'SELECT * FROM tb_login WHERE usuario = ? AND senha = ?',
-            [username, password]
-        );
-        return rows.length > 0 ? rows[0] : null;
-    }
-
-    async createUser(username, password, tipoUsuario) {
-        const [result] = await con.execute(
-            'INSERT INTO tb_login (usuario, senha, tipo_usuario) VALUES (?, ?, ?)',
-            [username, password, tipoUsuario]
-        );
-        return result.insertId;
-    }
+export async function salvarLogin(login) {
+  const comando = `
+    INSERT INTO tb_login (usuario, senha, tipo_usuario)
+    VALUES (?, ?, ?)
+  `;
+  
+  const [result] = await con.query(comando, [login.usuario, login.senha, login.tipoUsuario]);
+  login.id = result.insertId;
+  return login;
 }
 
-export default new LoginRepository();
+export async function buscarLoginPorUsuario(usuario) {
+  const comando = `
+    SELECT id_login AS id, usuario, senha, tipo_usuario AS tipoUsuario
+    FROM tb_login
+    WHERE usuario = ?
+  `;
+
+  const [linhas] = await con.query(comando, [usuario]);
+  return linhas[0];
+}
+
+export async function removerLogin(id) {
+  const comando = `
+    DELETE FROM tb_login WHERE id_login = ?
+  `;
+
+  const [result] = await con.query(comando, [id]);
+  return result.affectedRows;
+}

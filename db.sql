@@ -90,6 +90,17 @@ FOREIGN KEY (id_remetente) REFERENCES tb_usuarios(id_usuario),
 FOREIGN KEY (id_destinatario) REFERENCES tb_usuarios(id_usuario)
 );
 
+-- Tabela de Notificações
+CREATE TABLE tb_notificacoes (
+    id_notificacao INT PRIMARY KEY AUTO_INCREMENT,
+    id_usuario INT NOT NULL,               -- Usuário a ser notificado
+    tipo VARCHAR(50) NOT NULL,              -- Tipo da notificação (ex: 'Convite', 'Mudança de Quadra', 'Mudança de Partida')
+    mensagem TEXT NOT NULL,                 -- Mensagem descritiva da notificação
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status_lido BOOLEAN DEFAULT FALSE,      -- Status de leitura: lido ou não lido
+    FOREIGN KEY (id_usuario) REFERENCES tb_usuarios(id_usuario)
+);
+
 -- Tabela de Logs
 CREATE TABLE tb_logs (
 id_log INT AUTO_INCREMENT PRIMARY KEY,

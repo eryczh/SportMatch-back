@@ -1,36 +1,24 @@
-import LoginRepository from './LoginRepository';
+import { Router } from "express";
+import { salvarLogin, buscarLoginPorUsuario, removerLogin } from "../repository/LoginRepository.js";
 
-class LoginController {
-    async login(req, res) {
-        const { username, password } = req.body;
-        
-        try {
-            const user = await LoginRepository.validateUser(username, password);
-            if (user) {
-                res.status(200).json({ message: 'Login realizado com sucesso', user });
-            } else {
-                res.status(401).json({ message: 'Usuário ou senha incorretos' });
-            }
-        } catch (error) {
-            res.status(500).json({ message: 'Erro no servidor', error });
-        }
-    }
+const router = Router();
 
-    async register(req, res) {
-        const { username, password, tipoUsuario } = req.body;
+router.post('/login', async (req, resp) => {
+  const login = req.body;
+  const novoLogin = await salvarLogin(login);
+  resp.send(novoLogin);
+});
 
-        try {
-            const existingUser = await LoginRepository.findByUsername(username);
-            if (existingUser) {
-                return res.status(400).json({ message: 'Usuário já existe' });
-            }
+router.get('/login/:usuario', async (req, resp) => {
+  const usuario = req.params.usuario;
+  const login = await buscarLoginPorUsuario(usuario);
+  resp.send(login);
+});
 
-            const userId = await LoginRepository.createUser(username, password, tipoUsuario);
-            res.status(201).json({ message: 'Usuário registrado com sucesso', userId });
-        } catch (error) {
-            res.status(500).json({ message: 'Erro ao registrar usuário', error });
-        }
-    }
-}
+router.delete('/login/:id', async (req, resp) => {
+  const id = req.params.id;
+  const resultado = await removerLogin(id);
+  resp.status(resultado ? 202 : 404).send();
+});
 
-export default new LoginController();
+export default router;
