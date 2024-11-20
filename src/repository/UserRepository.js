@@ -83,3 +83,31 @@ export async function editarConta(idUsuario, dados) {
 
   return result.affectedRows > 0; // Retorna `true` se alguma linha foi afetada
 }
+
+export const alterarSenhaUsuario = async (idUsuario, senhaAntiga, novaSenha) => {
+  const comandoBuscarSenha = `
+    SELECT senha 
+    FROM tb_login 
+    WHERE id = ?;
+  `;
+
+  const comandoAtualizarSenha = `
+    UPDATE tb_login
+    SET senha = ?
+    WHERE id = ?;
+  `;
+
+  try {
+    const [result] = await con.query(comandoBuscarSenha, [idUsuario]);
+
+    if (!result.length || result[0].senha !== senhaAntiga) {
+      return false; // Usuário não encontrado ou senha antiga inválida
+    }
+
+    await con.query(comandoAtualizarSenha, [novaSenha, idUsuario]);
+    return true; // Senha alterada com sucesso
+  } catch (err) {
+    console.error('Erro ao alterar a senha:', err);
+    throw err; // Para ser tratado pelo controller
+  }
+};

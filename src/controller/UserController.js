@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { salvarUsuario, listarUsuarios, buscarUsuarioPorId, salvarLogin, realizarLogin, editarConta } from "../repository/UserRepository.js";
+import { salvarUsuario, listarUsuarios, buscarUsuarioPorId, salvarLogin, realizarLogin, editarConta, alterarSenhaUsuario } from "../repository/UserRepository.js";
 
 const router = Router();
 router.post('/usuario', async (req, resp) => {
@@ -80,5 +80,26 @@ router.put('/usuario/:id', async (req, resp) => {
     resp.status(500).send({ message: "Erro ao editar informações da conta. Tente novamente mais tarde." });
   }
 });
+
+export const alterarSenha = async (req, res) => {
+  try {
+    const { idUsuario, senhaAntiga, novaSenha } = req.body;
+
+    if (!idUsuario || !senhaAntiga || !novaSenha) {
+      return res.status(400).send({ error: 'Todos os campos são obrigatórios.' });
+    }
+
+    const senhaAlterada = await alterarSenhaUsuario(idUsuario, senhaAntiga, novaSenha);
+
+    if (!senhaAlterada) {
+      return res.status(400).send({ error: 'Senha antiga inválida ou usuário não encontrado.' });
+    }
+
+    res.status(200).send({ message: 'Senha alterada com sucesso.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: 'Erro interno ao alterar a senha.' });
+  }
+};
 
 export default router;
