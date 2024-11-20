@@ -1,16 +1,39 @@
 import { Router } from "express";
-import { salvarUsuario, listarUsuarios, buscarUsuarioPorId } from "../repository/UserRepository.js";
+import { salvarUsuario, listarUsuarios, buscarUsuarioPorId, salvarLogin, realizarLogin, editarConta } from "../repository/UserRepository.js";
 
 const router = Router();
-
 router.post('/usuario', async (req, resp) => {
   try {
-    const usuario = req.body;
+    const { login, ...dadosUsuario } = req.body;
+
+    // Salvar login e obter o objeto atualizado com o ID
+    const novoLogin = await salvarLogin(login);
+
+    // Salvar usuário usando o ID do login
+    const usuario = { ...dadosUsuario, idLogin: novoLogin.id };
     const novoUsuario = await salvarUsuario(usuario);
-    resp.status(201).send(novoUsuario);  
+
+    resp.status(201).send({ usuario: novoUsuario, login: novoLogin });
   } catch (error) {
-    console.error("Erro ao salvar usuário:", error);
+    console.error("Erro ao salvar usuário e login:", error);
     resp.status(500).send({ message: "Erro ao salvar usuário. Tente novamente mais tarde." });
+  }
+});
+
+router.post('/login', async (req, resp) => {
+  try {
+    const { usuario, senha } = req.body;
+
+    const login = await realizarLogin(usuario, senha);
+
+    if (!login) {
+      return resp.status(401).send({ message: "Usuário ou senha inválidos." });
+    }
+
+    resp.status(200).send(login); // Retorna as informações do login
+  } catch (error) {
+    console.error("Erro ao realizar login:", error);
+    resp.status(500).send({ message: "Erro ao realizar login. Tente novamente mais tarde." });
   }
 });
 
@@ -37,6 +60,24 @@ router.get('/usuario/:id', async (req, resp) => {
   } catch (error) {
     console.error("Erro ao buscar usuário:", error);
     resp.status(500).send({ message: "Erro ao buscar usuário. Tente novamente mais tarde." });
+  }
+});
+
+router.put('/usuario/:id', async (req, resp) => {
+  try {
+    const idUsuario = req.params.id;
+    const dados = req.body;
+
+    const sucesso = await editarConta(idUsuario, dados);
+
+    if (!sucesso) {
+      return resp.status(404).send({ message: "Usuário não encontrado ou dados não atualizados." });
+    }
+
+    resp.status(200).send({ message: "Informações atualizadas com sucesso." });
+  } catch (error) {
+    console.error("Erro ao editar conta:", error);
+    resp.status(500).send({ message: "Erro ao editar informações da conta. Tente novamente mais tarde." });
   }
 });
 

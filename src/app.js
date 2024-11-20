@@ -2,7 +2,6 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 
-import loginController from './controller/LoginController.js';
 import usuarioController from './controller/UserController.js';
 import quadraController from './controller/QuadraController.js';
 import quadraImagemController from './controller/QuadraImagemController.js';
@@ -16,7 +15,6 @@ const servidor = express();
 servidor.use(cors());
 servidor.use(express.json());
 
-servidor.use(loginController);
 servidor.use(usuarioController);
 servidor.use(quadraController);
 servidor.use(quadraImagemController);
