@@ -59,22 +59,22 @@ jogadores_maximos INT NOT NULL
 
 -- Tabela de Partidas
 CREATE TABLE tb_partidas (
-id_partida INT PRIMARY KEY AUTO_INCREMENT,
-id_quadra INT NOT NULL,
-id_criador INT NOT NULL,
-privada BOOLEAN NOT NULL,
-data DATE NOT NULL,
-hora_inicio TIME NOT NULL,
-duracao INT NOT NULL,
-status VARCHAR(20) NOT NULL,
-jogadores_maximos INT NOT NULL,
-jogadores_minimos INT NOT NULL,
-taxa_total DECIMAL(10,2) NOT NULL,
-taxa_por_participante DECIMAL(10,2) NOT NULL,
-id_tag_esporte INT NOT NULL,
-FOREIGN KEY (id_quadra) REFERENCES tb_quadras(id_quadra),
-FOREIGN KEY (id_criador) REFERENCES tb_usuarios(id_usuario),
-FOREIGN KEY (id_tag_esporte) REFERENCES tb_tags_esportes(id_esporte)
+  id_partida INT PRIMARY KEY AUTO_INCREMENT, -- Identificador único da partida
+  id_quadra INT NOT NULL,                    -- Identificador da quadra usada na partida
+  id_criador INT NOT NULL,                   -- Identificador do criador da partida
+  privada BOOLEAN NOT NULL,                  -- Indica se a partida é privada ou pública
+  data DATE NOT NULL,                        -- Data da partida
+  hora_inicio TIME NOT NULL,                 -- Hora de início da partida
+  duracao INT NOT NULL,                      -- Duração da partida em minutos
+  jogadores_maximos INT NOT NULL,            -- Número máximo de jogadores
+  jogadores_minimos INT NOT NULL,            -- Número mínimo de jogadores
+  taxa_por_participante DECIMAL(10, 2) NOT NULL, -- Taxa por jogador para participar da partida
+  id_tag_esporte INT NOT NULL,               -- Esporte associado à partida
+  id_status INT NOT NULL,                    -- Status da partida (referencia tabela de status)
+  FOREIGN KEY (id_quadra) REFERENCES tb_quadras(id_quadra), -- Relacionamento com tabela de quadras
+  FOREIGN KEY (id_criador) REFERENCES tb_usuarios(id_usuario), -- Relacionamento com criador
+  FOREIGN KEY (id_tag_esporte) REFERENCES tb_tags_esportes(id_esporte), -- Relacionamento com esporte
+  FOREIGN KEY (id_status) REFERENCES tb_status_partidas(id_status) -- Relacionamento com status da partida
 );
 
 -- Tabela de Convites para Partidas
