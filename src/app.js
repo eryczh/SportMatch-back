@@ -1,31 +1,45 @@
-import 'dotenv/config';
 import express from 'express';
+import bodyParser from 'body-parser';
 import cors from 'cors';
+import dotenv from 'dotenv';
 
-import usuarioController from './controller/UserController.js';
-import quadraController from './controller/QuadraController.js';
-import quadraImagemController from './controller/QuadraImagemController.js';
-import tagEsporteController from './controller/TagEsporteController.js';
-import partidaController from './controller/PartidaController.js';
-import convitePartidaController from './controller/ConvitePartidaController.js';
-import notificacaoController from './controller/NotificacaoController.js';
-import logController from './controller/LogController.js';
+// Importando rotas
+import userRoutes from './routes/userRoutes.js';
+import quadraRoutes from './routes/quadraRoutes.js';
+import partidaRoutes from './routes/partidaRoutes.js';
+import participanteRoutes from './routes/participanteRoutes.js';
+import notificacaoRoutes from './routes/notificacaoRoutes.js';
+import avaliacaoRoutes from './routes/avaliacaoRoutes.js';
+import logRoutes from './routes/logRoutes.js';
+import encryptionConfig from './config/encryption.js';
 
-const servidor = express();
-servidor.use(cors());
-servidor.use(express.json());
+//console.log('Chave de Criptografia:', encryptionConfig.key);
+//console.log('IV:', encryptionConfig.iv);
 
-servidor.use(usuarioController);
-servidor.use(quadraController);
-servidor.use(quadraImagemController);
-servidor.use(tagEsporteController);
-servidor.use(partidaController);
-servidor.use(convitePartidaController);
-servidor.use(notificacaoController);
-servidor.use(logController);
+dotenv.config();
 
-servidor.use('/storage/perfil', express.static('storage/perfil'));
-servidor.use('/storage/quadra', express.static('storage/quadra'));
+const app = express();
 
-let port = process.env.PORT || 3000;
-servidor.listen(port, () => console.log(`API SUBIU na porta ${port}!`));
+// Middlewares
+app.use(cors());
+app.use(bodyParser.json());
+
+// Rotas principais
+app.use('/usuarios', userRoutes);
+app.use('/quadras', quadraRoutes);
+app.use('/partidas', partidaRoutes);
+app.use('/participantes', participanteRoutes);
+app.use('/notificacoes', notificacaoRoutes);
+app.use('/avaliacoes', avaliacaoRoutes);
+app.use('/logs', logRoutes);
+
+// Rota raiz
+app.get('/', (req, res) => {
+    res.send('API do SportsMatch está rodando!');
+});
+
+// Configuração da porta
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+});
