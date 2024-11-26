@@ -25,22 +25,6 @@ export async function createPartida(partida) {
     return partida;
 }
 
-export async function updatePartida(id, partida) {
-    const comando = `
-        UPDATE tb_partidas
-        SET id_quadra = ?, data_horario = ?, max_jogadores = ?, status = ?
-        WHERE id_partida = ?;
-    `;
-    const [result] = await connection.query(comando, [
-        partida.id_quadra,
-        partida.data_horario,
-        partida.max_jogadores,
-        partida.status,
-        id,
-    ]);
-    return result.affectedRows;
-}
-
 export async function deletePartida(id) {
     // Remove os participantes associados
     await connection.query(`DELETE FROM tb_participantes WHERE id_partida = ?;`, [id]);
@@ -75,4 +59,34 @@ export async function listPartidasByUser(id_usuario) {
     `;
     const [rows] = await connection.query(comando, [id_usuario]);
     return rows;
+}
+
+export async function listPartidasByAdmin(id_administrador) {
+    const comando = `
+        SELECT 
+            p.id_partida,
+            p.id_quadra,
+            p.id_criador,
+            p.data_horario,
+            p.max_jogadores,
+            p.status,
+            q.nome AS quadra_nome,
+            u.nome AS criador_nome
+        FROM tb_partidas p
+        JOIN tb_quadras q ON p.id_quadra = q.id_quadra
+        JOIN tb_usuarios u ON p.id_criador = u.id_usuario
+        WHERE q.id_administrador = ?;
+    `;
+    const [rows] = await connection.query(comando, [id_administrador]);
+    return rows;
+}
+
+export async function updatePartidaStatus(id_partida, status) {
+    const comando = `
+        UPDATE tb_partidas
+        SET status = ?
+        WHERE id_partida = ?;
+    `;
+    const [result] = await connection.query(comando, [status, id_partida]);
+    return result.affectedRows;
 }

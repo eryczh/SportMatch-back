@@ -1,9 +1,10 @@
 import {
     createPartida,
-    updatePartida,
     deletePartida,
     listPartidas,
     listPartidasByUser,
+    listPartidasByAdmin,
+    updatePartidaStatus,
 } from '../repositories/partidaRepository.js';
 import { logAction } from './logController.js';
 
@@ -47,31 +48,6 @@ export async function handleListPartidasByUser(req, res) {
     }
 }
 
-export async function handleUpdatePartida(req, res) {
-    try {
-        const id = req.params.id;
-        const partida = req.body;
-
-        const rowsAffected = await updatePartida(id, partida);
-
-        if (!rowsAffected) {
-            return res.status(404).send({ message: 'Partida não encontrada.' });
-        }
-
-        await logAction(
-            `Partida atualizada para a quadra ${partida.id_quadra}`,
-            partida.id_criador,
-            'Atualização de Partida',
-            'Sucesso'
-        );
-
-        res.status(204).send();
-    } catch (err) {
-        console.error('Erro ao atualizar partida:', err);
-        res.status(500).send({ message: 'Erro ao atualizar partida.' });
-    }
-}
-
 export async function handleDeletePartida(req, res) {
     try {
         const id = req.params.id;
@@ -93,5 +69,42 @@ export async function handleDeletePartida(req, res) {
     } catch (err) {
         console.error('Erro ao deletar partida:', err);
         res.status(500).send({ message: 'Erro ao deletar partida.' });
+    }
+}
+
+export async function handleListPartidasByAdmin(req, res) {
+    try {
+        const { id_administrador } = req.query;
+
+        if (!id_administrador) {
+            return res.status(400).send({ message: 'ID do administrador é obrigatório.' });
+        }
+
+        const partidas = await listPartidasByAdmin(id_administrador);
+        res.status(200).send(partidas);
+    } catch (err) {
+        console.error('Erro ao listar partidas do administrador:', err.message);
+        res.status(500).send({ message: 'Erro ao listar partidas do administrador.' });
+    }
+}
+
+export async function handleUpdatePartidaStatus(req, res) {
+    try {
+        const { id_partida, status } = req.body;
+
+        if (!id_partida || !status) {
+            return res.status(400).send({ message: 'ID da partida e status são obrigatórios.' });
+        }
+
+        const rowsAffected = await updatePartidaStatus(id_partida, status);
+
+        if (!rowsAffected) {
+            return res.status(404).send({ message: 'Partida não encontrada.' });
+        }
+
+        res.status(204).send();
+    } catch (err) {
+        console.error('Erro ao atualizar status da partida:', err.message);
+        res.status(500).send({ message: 'Erro ao atualizar status da partida.' });
     }
 }
