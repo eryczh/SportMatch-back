@@ -9,6 +9,15 @@ import { logAction } from './logController.js';
 export async function handleAddAvaliacao(req, res) {
     try {
         const avaliacao = req.body;
+
+        // Validações antes de processar a requisição
+        if (!avaliacao.nota || avaliacao.nota < 1 || avaliacao.nota > 5) {
+            return res.status(400).send({ message: 'A nota deve ser entre 1 e 5.' });
+        }
+        if (!avaliacao.id_usuario || !avaliacao.id_quadra) {
+            return res.status(400).send({ message: 'ID do usuário e ID da quadra são obrigatórios.' });
+        }
+
         const newAvaliacao = await addAvaliacao(avaliacao);
 
         await logAction(
@@ -23,12 +32,22 @@ export async function handleAddAvaliacao(req, res) {
         console.error('Erro ao adicionar avaliação:', err);
         res.status(500).send({ message: 'Erro ao adicionar avaliação.' });
     }
+
+    
 }
 
 export async function handleUpdateAvaliacao(req, res) {
     try {
         const id = req.params.id;
         const { nota, comentario } = req.body;
+
+        // Validações antes de processar a requisição
+        if (!nota || nota < 1 || nota > 5) {
+            return res.status(400).send({ message: 'A nota deve ser entre 1 e 5.' });
+        }
+        if (!id_usuario || !id_quadra) {
+            return res.status(400).send({ message: 'ID do usuário e ID da quadra são obrigatórios.' });
+        }
 
         await updateAvaliacao(id, nota, comentario);
 
