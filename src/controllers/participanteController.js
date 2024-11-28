@@ -2,8 +2,7 @@ import {
     addParticipante,
     updateParticipante,
     removeParticipante,
-    listParticipantesByPartida,
-    listParticipacoesByUsuario
+    listParticipantesByPartida
 } from '../repositories/participanteRepository.js';
 import { logAction } from './logController.js';
 
@@ -69,27 +68,12 @@ export async function handleRemoveParticipante(req, res) {
 
 export async function handleListParticipantes(req, res) {
     try {
-        const { id_partida } = req.query;
-        const participantes = await listParticipantesByPartida(id_partida);
-        res.send(participantes);
-    } catch (err) {
-        console.error('Erro ao listar participantes:', err);
-        res.status(500).send({ message: 'Erro ao listar participantes.' });
-    }
-}
+        const { id } = req.params;
 
-export async function handleListParticipacoesByUsuario(req, res) {
-    try {
-        const { id_usuario } = req.query;
-
-        if (!id_usuario) {
-            return res.status(400).send({ message: 'ID do usuário é obrigatório.' });
-        }
-
-        const participacoes = await listParticipacoesByUsuario(id_usuario);
+        const participacoes = await listParticipantesByPartida(id);
         res.send(participacoes);
     } catch (err) {
-        console.error('Erro ao listar participações do usuário:', err.message);
-        res.status(500).send({ message: 'Erro ao listar participações do usuário.' });
+        console.error('Erro ao listar participações da partida:', err.message);
+        res.status(500).send({ message: 'Erro ao listar participações da partida.' });
     }
 }

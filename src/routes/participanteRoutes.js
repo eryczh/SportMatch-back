@@ -3,8 +3,7 @@ import {
     handleAddParticipante,
     handleUpdateParticipante,
     handleRemoveParticipante,
-    handleListParticipantes,
-    handleListParticipacoesByUsuario
+    handleListParticipantes
 } from '../controllers/participanteController.js';
 
 const router = express.Router();
@@ -12,7 +11,6 @@ const router = express.Router();
 router.post('/', handleAddParticipante);
 router.put('/:id', handleUpdateParticipante);
 router.delete('/:id', handleRemoveParticipante);
-router.get('/', handleListParticipantes);
-router.get('/participacoes/usuario', handleListParticipacoesByUsuario);
+router.get('/:id', handleListParticipantes);
 
 export default router;
