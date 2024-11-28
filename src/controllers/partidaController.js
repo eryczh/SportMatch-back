@@ -5,6 +5,7 @@ import {
     listPartidasByUser,
     listPartidasByAdmin,
     updatePartidaStatus,
+    listPartidasParticipadasByUser,
 } from '../repositories/partidaRepository.js';
 import { logAction } from './logController.js';
 
@@ -106,5 +107,26 @@ export async function handleUpdatePartidaStatus(req, res) {
     } catch (err) {
         console.error('Erro ao atualizar status da partida:', err.message);
         res.status(500).send({ message: 'Erro ao atualizar status da partida.' });
+    }
+}
+
+export async function handleListPartidasParticipadasByUser(req, res) {
+    try {
+        const id_usuario = req.params.id;
+
+        if (!id_usuario) {
+            return res.status(400).send({ message: 'ID do usuário é obrigatório.' });
+        }
+
+        const partidas = await listPartidasParticipadasByUser(id_usuario);
+
+        if (partidas.length === 0) {
+            return res.status(404).send({ message: 'Nenhuma participação encontrada para o usuário.' });
+        }
+
+        res.status(200).send(partidas);
+    } catch (err) {
+        console.error('Erro ao listar partidas participadas:', err.message);
+        res.status(500).send({ message: 'Erro ao listar partidas participadas pelo usuário.' });
     }
 }

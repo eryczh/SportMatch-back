@@ -90,3 +90,25 @@ export async function updatePartidaStatus(id_partida, status) {
     const [result] = await connection.query(comando, [status, id_partida]);
     return result.affectedRows;
 }
+
+export async function listPartidasParticipadasByUser(id_usuario) {
+    const comando = `
+        SELECT 
+            p.id_partida,
+            p.id_quadra,
+            p.data_horario,
+            p.max_jogadores,
+            p.status,
+            q.nome AS quadra_nome,
+            p.id_criador,
+            q.endereco AS quadra_endereco,
+            u.nome AS criador_nome
+        FROM tb_participantes par
+        INNER JOIN tb_partidas p ON par.id_partida = p.id_partida
+        INNER JOIN tb_quadras q ON p.id_quadra = q.id_quadra
+        INNER JOIN tb_usuarios u ON p.id_criador = u.id_usuario
+        WHERE par.id_usuario = ?;
+    `;
+    const [rows] = await connection.query(comando, [id_usuario]);
+    return rows;
+}
