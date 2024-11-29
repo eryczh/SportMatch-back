@@ -11,6 +11,7 @@ import participanteRoutes from './routes/participanteRoutes.js';
 import notificacaoRoutes from './routes/notificacaoRoutes.js';
 import avaliacaoRoutes from './routes/avaliacaoRoutes.js';
 import logRoutes from './routes/logRoutes.js';
+import conviteRoutes from './routes/conviteRoutes.js';
 import encryptionConfig from './config/encryption.js';
 
 //console.log('Chave de Criptografia:', encryptionConfig.key);
@@ -32,6 +33,7 @@ app.use('/participantes', participanteRoutes);
 app.use('/notificacoes', notificacaoRoutes);
 app.use('/avaliacoes', avaliacaoRoutes);
 app.use('/logs', logRoutes);
+app.use('/convites', conviteRoutes);
 
 app.use('/storage/perfil', express.static('storage/perfil'));
 app.use('/storage/quadras', express.static('storage/quadras'));

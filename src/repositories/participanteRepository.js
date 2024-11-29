@@ -28,10 +28,12 @@ export async function removeParticipante(id) {
 
 export async function listParticipantesByPartida(id_partida) {
     const comando = `
-        SELECT p.*, (SELECT COUNT(*) FROM tb_participantes WHERE id_partida = ?) AS total_participantes
-        FROM tb_participantes p
-        WHERE p.id_partida = ?;
-        `;
-    const [rows] = await connection.query(comando, [id_partida,id_partida]);
+        SELECT 
+            id_participante, 
+            id_usuario 
+        FROM tb_participantes
+        WHERE id_partida = ?;
+    `;
+    const [rows] = await connection.query(comando, [id_partida]);
     return rows;
 }

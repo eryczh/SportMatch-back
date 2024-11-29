@@ -6,6 +6,7 @@ import {
     authenticateUser,
     updateUserPhoto,
     updateUserFields,
+    getUserByEmail,
 } from '../repositories/UserRepository.js';
 import { logAction } from './logController.js';
 import multer from 'multer';
@@ -179,3 +180,20 @@ export async function handleAuthenticateUser(req, res) {
     }
 }
 
+// Buscar usuário por email
+export async function handleGetUserByEmail(req, res) {
+    try {
+        const { email } = req.params; // Obtém o email do usuário a partir dos parâmetros da URL
+        const user = await getUserByEmail(email); // Chama a função que consulta o banco de dados
+
+        if (user) {
+            delete user.senha_hash; // Remove o hash da senha antes de enviar a resposta
+            res.status(200).send(user); // Retorna os dados do usuário
+        } else {
+            res.status(404).send({ message: 'Usuário não encontrado.' }); // Caso o usuário não exista
+        }
+    } catch (err) {
+        console.error('Erro ao buscar usuário pelo email:', err); // Log de erro no servidor
+        res.status(500).send({ message: 'Erro ao buscar usuário pelo email.' }); // Retorna um erro genérico
+    }
+}

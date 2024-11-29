@@ -52,13 +52,6 @@ export async function handleRemoveParticipante(req, res) {
 
         await removeParticipante(id);
 
-        await logAction(
-            `Participante removido com ID: ${id}`,
-            id,
-            'Remoção de Participante',
-            'Sucesso'
-        );
-
         res.status(204).send();
     } catch (err) {
         console.error('Erro ao remover participante:', err);

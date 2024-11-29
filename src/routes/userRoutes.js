@@ -5,6 +5,7 @@ import {
     handleAuthenticateUser,
     handleUpdateUserFields,
     handleUpdateUserPhoto,
+    handleGetUserByEmail,
 } from '../controllers/userController.js';
 
 const router = express.Router();
@@ -23,5 +24,7 @@ router.put('/:id/fields', handleUpdateUserFields);
 
 // Atualizar foto de perfil
 router.put('/:id/foto', handleUpdateUserPhoto);
+
+router.get('/email/:email', handleGetUserByEmail);
 
 export default router;
