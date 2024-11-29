@@ -1,3 +1,4 @@
+import upload from '../utils/uploadConfig.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import {
@@ -51,6 +52,38 @@ export async function handleGetUserById(req, res) {
 // Atualizar usuário
 export async function handleUpdateUser(req, res) {
     try {
+        upload.single('foto_perfil')(req, res, async (err) => {
+            if (err) {
+                return res.status(400).send({ message: 'Erro no upload da foto de perfil.' });
+            }
+
+            const id = req.params.id;
+            const user = req.body;
+
+            // Se houver upload, adiciona o caminho da foto ao objeto do usuário
+            if (req.file) {
+                user.foto_perfil = req.file.path;
+            }
+
+            await updateUser(id, user);
+
+            await logAction(
+                `Usuário atualizado: ${user.email}`,
+                id,
+                'Atualização de Usuário',
+                'Sucesso'
+            );
+
+            res.status(204).send();
+        });
+    } catch (err) {
+        console.error('Erro ao atualizar usuário:', err);
+        res.status(500).send({ message: 'Erro ao atualizar usuário.' });
+    }
+}
+/*
+export async function handleUpdateUser(req, res) {
+    try {
         const id = req.params.id;
         const user = req.body;
 
@@ -69,6 +102,7 @@ export async function handleUpdateUser(req, res) {
         res.status(500).send({ message: 'Erro ao atualizar usuário.' });
     }
 }
+*/
 
 // Autenticar usuário (Login)
 export async function handleAuthenticateUser(req, res) {

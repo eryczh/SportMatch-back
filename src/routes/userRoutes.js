@@ -20,4 +20,6 @@ router.put('/:id', handleUpdateUser);
 // Autenticar usuário
 router.post('/auth', handleAuthenticateUser);
 
+
+
 export default router;

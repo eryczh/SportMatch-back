@@ -50,6 +50,22 @@ export async function getUserById(id) {
 export async function updateUser(id, user) {
     const comando = `
         UPDATE tb_usuarios 
+        SET email = ?, celular = ?, endereco = ?, cep = ?, foto_perfil = ?
+        WHERE id_usuario = ?;
+    `;
+    await connection.query(comando, [
+        encrypt(user.email), // Email criptografado
+        encrypt(user.celular || ''), // Celular criptografado
+        encrypt(user.endereco || ''), // Endereço criptografado
+        encrypt(user.cep || ''), // CEP criptografado
+        user.foto_perfil || null, // Foto de perfil
+        id,
+    ]);
+}
+/*
+export async function updateUser(id, user) {
+    const comando = `
+        UPDATE tb_usuarios 
         SET email = ?, celular = ?, endereco = ?, cep = ? 
         WHERE id_usuario = ?;
     `;
@@ -61,6 +77,7 @@ export async function updateUser(id, user) {
         id,
     ]);
 }
+*/
 
 // Autenticar usuário
 export async function authenticateUser(email) {

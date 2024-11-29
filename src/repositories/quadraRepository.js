@@ -1,5 +1,36 @@
 import connection from '../db/connection.js';
 
+// Adicionar imagem à quadra
+export async function addQuadraImage(id_quadra, url_imagem) {
+    const comando = `
+        INSERT INTO tb_quadras_imagens (id_quadra, url_imagem)
+        VALUES (?, ?);
+    `;
+    const [result] = await connection.query(comando, [id_quadra, url_imagem]);
+    return result.insertId; // Retorna o ID da imagem inserida
+}
+
+// Listar imagens de uma quadra
+export async function listQuadraImages(id_quadra) {
+    const comando = `
+        SELECT id_imagem, url_imagem 
+        FROM tb_quadras_imagens
+        WHERE id_quadra = ?;
+    `;
+    const [rows] = await connection.query(comando, [id_quadra]);
+    return rows; // Retorna uma lista de imagens
+}
+
+// Excluir imagem da quadra
+export async function deleteQuadraImage(id_imagem) {
+    const comando = `
+        DELETE FROM tb_quadras_imagens
+        WHERE id_imagem = ?;
+    `;
+    const [result] = await connection.query(comando, [id_imagem]);
+    return result.affectedRows; // Retorna o número de linhas afetadas
+}
+
 // Criar uma quadra
 export async function createQuadra(quadra) {
     const comando = `
