@@ -6,6 +6,8 @@ import {
     handleUpdateUserFields,
     handleUpdateUserPhoto,
     handleGetUserByEmail,
+    handleGetUserByCpfOrEmail,
+    handleGetUserByCPF,
 } from '../controllers/userController.js';
 
 const router = express.Router();
@@ -26,5 +28,10 @@ router.put('/:id/fields', handleUpdateUserFields);
 router.put('/:id/foto', handleUpdateUserPhoto);
 
 router.get('/email/:email', handleGetUserByEmail);
+
+router.get('/email/:email', handleGetUserByCPF);
+
+router.get('/usuario/buscar', handleGetUserByCpfOrEmail);
+
 
 export default router;

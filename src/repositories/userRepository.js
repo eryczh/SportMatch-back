@@ -122,3 +122,34 @@ export async function getUserByEmail(email) {
     }
     return null; // Retorna null se o usuário não for encontrado
 }
+
+export async function getUserByCPF(cpf) {
+    const comando = `
+        SELECT id_usuario, nome, data_nascimento, cpf, email, celular, cep, endereco, cidade, estado, tipo, foto_perfil 
+        FROM tb_usuarios 
+        WHERE cpf = ?;
+    `;
+    const [rows] = await connection.query(comando, [encrypt(cpf)]); // Email é criptografado antes da consulta
+    if (rows.length > 0) {
+        const user = rows[0];
+        user.cpf = decrypt(user.cpf); // Decifra o CPF
+        user.email = decrypt(user.email); // Decifra o email
+        user.celular = decrypt(user.celular); // Decifra o celular
+        user.cep = decrypt(user.cep); // Decifra o CEP
+        user.endereco = decrypt(user.endereco); // Decifra o endereço
+        return user;
+    }
+    return null; // Retorna null se o usuário não for encontrado
+}
+
+
+// Buscar usuário por CPF ou email
+export async function getUserByCpfOrEmail(cpf, email) {
+    const comando = `
+        SELECT id_usuario 
+        FROM tb_usuarios 
+        WHERE cpf = ? OR email = ?;
+    `;
+    const [rows] = await connection.query(comando, [encrypt(cpf), encrypt(email)]);
+    return rows.length > 0; // Retorna true se encontrar algum usuário
+}

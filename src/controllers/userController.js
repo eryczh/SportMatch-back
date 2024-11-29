@@ -7,6 +7,8 @@ import {
     updateUserPhoto,
     updateUserFields,
     getUserByEmail,
+    getUserByCpfOrEmail,
+    getUserByCPF,
 } from '../repositories/UserRepository.js';
 import { logAction } from './logController.js';
 import multer from 'multer';
@@ -15,9 +17,19 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const upload = multer({ dest: 'storage/perfil' });
 
 // Criar usuário
+// Criar usuário
 export async function handleCreateUser(req, res) {
     try {
         const user = req.body;
+
+        // Verificar se o CPF ou e-mail já está em uso
+        const isUserExists = await getUserByCpfOrEmail(user.cpf, user.email);
+        if (isUserExists) {
+            return res
+                .status(400)
+                .send({ message: 'CPF ou e-mail já cadastrado no sistema.' });
+        }
+
         user.senha_hash = await bcrypt.hash(user.senha, 10); // Criptografar a senha
         const newUser = await createUser(user);
 
@@ -180,6 +192,25 @@ export async function handleAuthenticateUser(req, res) {
     }
 }
 
+
+
+export async function handleGetUserByCPF(req, res) {
+    try {
+        const { cpf } = req.params; // Obtém o email do usuário a partir dos parâmetros da URL
+        const user = await getUserByCPF(cpf); // Chama a função que consulta o banco de dados
+
+        if (user) {
+            delete user.senha_hash; // Remove o hash da senha antes de enviar a resposta
+            res.status(200).send(user); // Retorna os dados do usuário
+        } else {
+            res.status(404).send({ message: 'Usuário não encontrado.' }); // Caso o usuário não exista
+        }
+    } catch (err) {
+        console.error('Erro ao buscar usuário pelo email:', err); // Log de erro no servidor
+        res.status(500).send({ message: 'Erro ao buscar usuário pelo email.' }); // Retorna um erro genérico
+    }
+}
+
 // Buscar usuário por email
 export async function handleGetUserByEmail(req, res) {
     try {
@@ -195,5 +226,21 @@ export async function handleGetUserByEmail(req, res) {
     } catch (err) {
         console.error('Erro ao buscar usuário pelo email:', err); // Log de erro no servidor
         res.status(500).send({ message: 'Erro ao buscar usuário pelo email.' }); // Retorna um erro genérico
+    }
+}
+
+export async function handleGetUserByCpfOrEmail(req, res) {
+    try {
+        const { cpf, email } = req.query; // Obtém os parâmetros da query string
+        const userExists = await getUserByCpfOrEmail(cpf, email);
+
+        if (userExists) {
+            res.status(200).send({ message: 'Usuário encontrado.' });
+        } else {
+            res.status(404).send({ message: 'Usuário não encontrado.' });
+        }
+    } catch (err) {
+        console.error('Erro ao buscar usuário por CPF ou e-mail:', err);
+        res.status(500).send({ message: 'Erro ao buscar usuário.' });
     }
 }
