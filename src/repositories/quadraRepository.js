@@ -1,7 +1,10 @@
 import connection from '../db/connection.js';
 
 // Adicionar imagem à quadra
-export async function addQuadraImage(id_quadra, url_imagem) {
+export async function addQuadraImage(id_quadra, file) {
+    const filePath = file.path; // Caminho completo do arquivo
+    const url_imagem = path.join(filePath); // Caminho relativo ou URL que será armazenado no banco
+
     const comando = `
         INSERT INTO tb_quadras_imagens (id_quadra, url_imagem)
         VALUES (?, ?);

@@ -1,3 +1,5 @@
+import upload from '../utils/multerQuadra.js';
+
 import {
     addQuadraImage,
     listQuadraImages,
@@ -11,18 +13,28 @@ import {
 } from '../repositories/quadraRepository.js';
 import { logAction } from './logController.js';
 
+
 // Adicionar imagem à quadra
 export async function handleAddQuadraImage(req, res) {
     try {
-        const { id_quadra, url_imagem } = req.body;
+        const { id_quadra } = req.body;
 
-        if (!id_quadra || !url_imagem) {
-            return res.status(400).send({ message: 'ID da quadra e URL da imagem são obrigatórios.' });
+        if (!id_quadra || !req.file) {
+            return res.status(400).send({ message: 'ID da quadra e imagem são obrigatórios.' });
         }
 
-        const id_imagem = await addQuadraImage(id_quadra, url_imagem);
+        // Passa o arquivo da imagem para a função do repositório
+        const id_imagem = await addQuadraImage(id_quadra, req.file);
 
-        res.status(201).send({ id_imagem, id_quadra, url_imagem });
+        // Registra a ação de log
+        await logAction(
+            `Imagem adicionada à quadra ID: ${id_quadra}`,
+            req.body.id_administrador,
+            'Adição de Imagem',
+            'Sucesso'
+        );
+
+        res.status(201).send({ id_imagem, id_quadra, url_imagem: req.file.path });
     } catch (err) {
         console.error('Erro ao adicionar imagem à quadra:', err);
         res.status(500).send({ message: 'Erro ao adicionar imagem à quadra.' });
