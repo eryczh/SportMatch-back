@@ -34,6 +34,7 @@ app.use('/avaliacoes', avaliacaoRoutes);
 app.use('/logs', logRoutes);
 
 app.use('/storage/perfil', express.static('storage/perfil'));
+app.use('/storage/quadras', express.static('storage/quadras'));
 
 // Rota raiz
 app.get('/', (req, res) => {

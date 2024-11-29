@@ -1,44 +1,46 @@
-import upload from '../utils/multerQuadra.js';
-
 import {
-    addQuadraImage,
-    listQuadraImages,
-    deleteQuadraImage,
     createQuadra,
     updateQuadra,
     deleteQuadra,
     listQuadrasByAdmin,
     listAllQuadras,
-    checkQuadraAvailability
+    checkQuadraAvailability,
+    addQuadraImage,
+    listQuadraImages,
+    deleteQuadraImage
 } from '../repositories/quadraRepository.js';
 import { logAction } from './logController.js';
+import multer from 'multer';
 
+const upload = multer({ dest: 'storage/quadras' });
 
-// Adicionar imagem à quadra
 export async function handleAddQuadraImage(req, res) {
-    try {
-        const { id_quadra } = req.body;
+    upload.single('imagem')(req, res, async (err) => {
+        if (err) {
+            return res.status(400).send({ message: 'Erro no upload da imagem.' });
+        }
 
-        if (!id_quadra || !req.file) {
+        const { id } = req.params;
+
+        if (!id || !req.file) {
             return res.status(400).send({ message: 'ID da quadra e imagem são obrigatórios.' });
         }
 
-        // Passa o arquivo da imagem para a função do repositório
-        const id_imagem = await addQuadraImage(id_quadra, req.file);
+        try {
+            const id_imagem = await addQuadraImage(id, req.file.path);
 
-        // Registra a ação de log
-        await logAction(
-            `Imagem adicionada à quadra ID: ${id_quadra}`,
-            req.body.id_administrador,
-            'Adição de Imagem',
-            'Sucesso'
-        );
+            await logAction(
+                `Imagem adicionada à quadra ID: ${id}`,
+                req.body.id_administrador || null, // Opcional
+                'Adição de Imagem',
+                'Sucesso'
+            );
 
-        res.status(201).send({ id_imagem, id_quadra, url_imagem: req.file.path });
-    } catch (err) {
-        console.error('Erro ao adicionar imagem à quadra:', err);
-        res.status(500).send({ message: 'Erro ao adicionar imagem à quadra.' });
-    }
+            res.status(201).send({ id_imagem, id_quadra: id, url_imagem: req.file.path });
+        } catch (error) {
+            res.status(500).send({ message: `Erro ao adicionar imagem: ${error.message}` });
+        }
+    });
 }
 
 // Listar imagens de uma quadra
@@ -59,7 +61,7 @@ export async function handleListQuadraImages(req, res) {
     }
 }
 
-// Excluir imagem da quadra
+// Excluir imagem de uma quadra
 export async function handleDeleteQuadraImage(req, res) {
     try {
         const { id_imagem } = req.params;
@@ -73,6 +75,13 @@ export async function handleDeleteQuadraImage(req, res) {
         if (!rowsAffected) {
             return res.status(404).send({ message: 'Imagem não encontrada.' });
         }
+
+        await logAction(
+            `Imagem deletada ID: ${id_imagem}`,
+            req.body.id_administrador,
+            'Exclusão de Imagem',
+            'Sucesso'
+        );
 
         res.status(204).send();
     } catch (err) {
