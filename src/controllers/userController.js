@@ -1,14 +1,17 @@
-import upload from '../utils/uploadConfig.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import {
     createUser,
     getUserById,
-    updateUser,
     authenticateUser,
+    updateUserPhoto,
+    updateUserFields,
 } from '../repositories/UserRepository.js';
 import { logAction } from './logController.js';
+import multer from 'multer';
 const JWT_SECRET = process.env.JWT_SECRET;
+
+const upload = multer({ dest: 'storage/perfil' });
 
 // Criar usuário
 export async function handleCreateUser(req, res) {
@@ -34,23 +37,46 @@ export async function handleCreateUser(req, res) {
 // Buscar usuário por ID
 export async function handleGetUserById(req, res) {
     try {
-        const id = req.params.id;
-        const user = await getUserById(id);
+        const id = req.params.id; // Obtém o ID do usuário a partir dos parâmetros da URL
+        const user = await getUserById(id); // Chama a função que consulta o banco de dados
 
         if (user) {
-            delete user.senha_hash; // Remover senha ao enviar resposta
-            res.send(user);
+            delete user.senha_hash; // Remove o hash da senha antes de enviar a resposta
+            res.status(200).send(user); // Retorna os dados do usuário
         } else {
-            res.status(404).send({ message: 'Usuário não encontrado.' });
+            res.status(404).send({ message: 'Usuário não encontrado.' }); // Caso o usuário não exista
         }
     } catch (err) {
-        console.error('Erro ao buscar usuário:', err);
-        res.status(500).send({ message: 'Erro ao buscar usuário.' });
+        console.error('Erro ao buscar usuário:', err); // Log de erro no servidor
+        res.status(500).send({ message: 'Erro ao buscar usuário.' }); // Retorna um erro genérico
     }
 }
 
-// Atualizar usuário
-export async function handleUpdateUser(req, res) {
+
+// Atualizar campos do perfil
+export async function handleUpdateUserFields(req, res) {
+    try {
+        const id = req.params.id;
+        const user = req.body;
+
+        await updateUserFields(id, user);
+
+        await logAction(
+            `Usuário atualizado: ${user.email}`,
+            id,
+            'Atualização de Campos do Perfil',
+            'Sucesso'
+        );
+
+        res.status(204).send();
+    } catch (err) {
+        console.error('Erro ao atualizar campos do perfil:', err);
+        res.status(500).send({ message: 'Erro ao atualizar campos do perfil.' });
+    }
+}
+
+// Atualizar foto de perfil
+export async function handleUpdateUserPhoto(req, res) {
     try {
         upload.single('foto_perfil')(req, res, async (err) => {
             if (err) {
@@ -58,29 +84,30 @@ export async function handleUpdateUser(req, res) {
             }
 
             const id = req.params.id;
-            const user = req.body;
 
-            // Se houver upload, adiciona o caminho da foto ao objeto do usuário
-            if (req.file) {
-                user.foto_perfil = req.file.path;
+            if (!req.file) {
+                return res.status(400).send({ message: 'Arquivo da foto de perfil não encontrado.' });
             }
 
-            await updateUser(id, user);
+            const fotoPerfilPath = req.file.path;
+
+            await updateUserPhoto(id, fotoPerfilPath);
 
             await logAction(
-                `Usuário atualizado: ${user.email}`,
+                `Foto de perfil atualizada para o usuário com ID: ${id}`,
                 id,
-                'Atualização de Usuário',
+                'Atualização de Foto de Perfil',
                 'Sucesso'
             );
 
             res.status(204).send();
         });
     } catch (err) {
-        console.error('Erro ao atualizar usuário:', err);
-        res.status(500).send({ message: 'Erro ao atualizar usuário.' });
+        console.error('Erro ao atualizar foto de perfil:', err);
+        res.status(500).send({ message: 'Erro ao atualizar foto de perfil.' });
     }
 }
+
 /*
 export async function handleUpdateUser(req, res) {
     try {
@@ -151,3 +178,4 @@ export async function handleAuthenticateUser(req, res) {
         res.status(500).send({ message: 'Erro ao autenticar usuário.' });
     }
 }
+

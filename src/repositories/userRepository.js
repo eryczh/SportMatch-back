@@ -36,32 +36,41 @@ export async function getUserById(id) {
     const [rows] = await connection.query(comando, [id]);
     if (rows.length > 0) {
         const user = rows[0];
-        user.cpf = decrypt(user.cpf);
-        user.email = decrypt(user.email);
-        user.celular = decrypt(user.celular);
-        user.cep = decrypt(user.cep);
-        user.endereco = decrypt(user.endereco);
+        user.cpf = decrypt(user.cpf); // Decifra o CPF
+        user.email = decrypt(user.email); // Decifra o email
+        user.celular = decrypt(user.celular); // Decifra o celular
+        user.cep = decrypt(user.cep); // Decifra o CEP
+        user.endereco = decrypt(user.endereco); // Decifra o endereço
         return user;
     }
-    return null;
+    return null; // Caso o usuário não exista
 }
 
-// Atualizar informações de usuário
-export async function updateUser(id, user) {
+// Atualizar campos do perfil
+export async function updateUserFields(id, user) {
     const comando = `
         UPDATE tb_usuarios 
-        SET email = ?, celular = ?, endereco = ?, cep = ?, foto_perfil = ?
+        SET celular = ?, endereco = ?, cep = ?
         WHERE id_usuario = ?;
     `;
     await connection.query(comando, [
-        encrypt(user.email), // Email criptografado
-        encrypt(user.celular || ''), // Celular criptografado
-        encrypt(user.endereco || ''), // Endereço criptografado
-        encrypt(user.cep || ''), // CEP criptografado
-        user.foto_perfil || null, // Foto de perfil
+        encrypt(user.celular || ''), // Criptografar celular
+        encrypt(user.endereco || ''), // Criptografar endereço
+        encrypt(user.cep || ''), // Criptografar CEP
         id,
     ]);
 }
+
+// Atualizar foto de perfil
+export async function updateUserPhoto(id, fotoPerfilPath) {
+    const comando = `
+        UPDATE tb_usuarios 
+        SET foto_perfil = ?
+        WHERE id_usuario = ?;
+    `;
+    await connection.query(comando, [fotoPerfilPath, id]);
+}
+
 /*
 export async function updateUser(id, user) {
     const comando = `

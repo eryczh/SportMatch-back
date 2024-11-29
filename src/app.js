@@ -33,6 +33,8 @@ app.use('/notificacoes', notificacaoRoutes);
 app.use('/avaliacoes', avaliacaoRoutes);
 app.use('/logs', logRoutes);
 
+app.use('/storage/perfil', express.static('storage/perfil'));
+
 // Rota raiz
 app.get('/', (req, res) => {
     res.send('API do SportsMatch está rodando!');
