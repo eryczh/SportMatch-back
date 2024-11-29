@@ -102,3 +102,16 @@ CREATE TABLE tb_logs (
     data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario) REFERENCES tb_usuarios(id_usuario)
 );
+
+CREATE TABLE tb_convites (
+    id_convite INT AUTO_INCREMENT PRIMARY KEY,       -- Identificador único do convite
+    id_partida INT NOT NULL,                         -- Referência para a partida relacionada
+    id_criador INT NOT NULL,                         -- Usuário que enviou o convite
+    id_jogador INT NOT NULL,                         -- Usuário convidado
+    mensagem TEXT,                                   -- Mensagem opcional no convite
+    data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP, -- Data de criação do convite
+    status ENUM('pendente', 'aceito', 'recusado') DEFAULT 'pendente', -- Status do convite
+    FOREIGN KEY (id_partida) REFERENCES tb_partidas(id_partida), -- Chave estrangeira para partidas
+    FOREIGN KEY (id_criador) REFERENCES tb_usuarios(id_usuario), -- Chave estrangeira para criador
+    FOREIGN KEY (id_jogador) REFERENCES tb_usuarios(id_usuario)  -- Chave estrangeira para jogador
+);
