@@ -6,6 +6,7 @@ import {
     listPartidasByAdmin,
     updatePartidaStatus,
     listPartidasParticipadasByUser,
+    listPartidasDisponiveis,
 } from '../repositories/partidaRepository.js';
 import { logAction } from './logController.js';
 
@@ -128,5 +129,34 @@ export async function handleListPartidasParticipadasByUser(req, res) {
     } catch (err) {
         console.error('Erro ao listar partidas participadas:', err.message);
         res.status(500).send({ message: 'Erro ao listar partidas participadas pelo usuário.' });
+    }
+}
+
+export async function handleListAvailableHorarios(req, res) {
+    try {
+        const { id_quadra, data } = req.body;
+
+        if (!id_quadra || !data) {
+            return res.status(400).send({ message: 'ID da quadra e data são obrigatórios.' });
+        }
+
+        // Chama o método no repository para buscar os horários ocupados
+        const partidas = await listPartidasDisponiveis(id_quadra, data);
+
+        // Define os horários possíveis (por exemplo, de 8h às 22h)
+        const horariosPossiveis = Array.from({ length: 14 }, (_, i) => `${8 + i}:00`);
+
+        // Extrai os horários ocupados das partidas
+        const horariosOcupados = partidas.map((partida) =>
+            new Date(partida.data_horario).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        );
+
+        // Calcula os horários disponíveis
+        const horariosDisponiveis = horariosPossiveis.filter((horario) => !horariosOcupados.includes(horario));
+
+        res.status(200).send(horariosDisponiveis);
+    } catch (err) {
+        console.error('Erro ao listar horários disponíveis:', err.message);
+        res.status(500).send({ message: 'Erro ao listar horários disponíveis.' });
     }
 }

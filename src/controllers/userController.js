@@ -9,6 +9,7 @@ import {
     getUserByEmail,
     getUserByCpfOrEmail,
     getUserByCPF,
+    updatePassword,
 } from '../repositories/UserRepository.js';
 import { logAction } from './logController.js';
 import multer from 'multer';
@@ -203,7 +204,7 @@ export async function handleGetUserByCPF(req, res) {
             delete user.senha_hash; // Remove o hash da senha antes de enviar a resposta
             res.status(200).send(user); // Retorna os dados do usuário
         } else {
-            res.status(404).send({ message: 'Usuário não encontrado.' }); // Caso o usuário não exista
+            res.status(201).send({ message: 'Usuário não encontrado.' }); // Caso o usuário não exista
         }
     } catch (err) {
         console.error('Erro ao buscar usuário pelo email:', err); // Log de erro no servidor
@@ -221,7 +222,7 @@ export async function handleGetUserByEmail(req, res) {
             delete user.senha_hash; // Remove o hash da senha antes de enviar a resposta
             res.status(200).send(user); // Retorna os dados do usuário
         } else {
-            res.status(404).send({ message: 'Usuário não encontrado.' }); // Caso o usuário não exista
+            res.status(201).send({ message: 'Usuário não encontrado.' }); // Caso o usuário não exista
         }
     } catch (err) {
         console.error('Erro ao buscar usuário pelo email:', err); // Log de erro no servidor
@@ -237,10 +238,52 @@ export async function handleGetUserByCpfOrEmail(req, res) {
         if (userExists) {
             res.status(200).send({ message: 'Usuário encontrado.' });
         } else {
-            res.status(404).send({ message: 'Usuário não encontrado.' });
+            res.status(201).send({ message: 'Usuário não encontrado.' }); // Caso o usuário não exista
         }
     } catch (err) {
         console.error('Erro ao buscar usuário por CPF ou e-mail:', err);
         res.status(500).send({ message: 'Erro ao buscar usuário.' });
+    }
+}
+
+// Alterar senha
+export async function handleUpdatePassword(req, res) {
+    try {
+        const { id_usuario, currentPassword, newPassword } = req.body;
+
+        if (!id_usuario || !currentPassword || !newPassword) {
+            return res.status(400).send({ message: 'ID do usuário, senha atual e nova senha são obrigatórios.' });
+        }
+
+        // Buscar o usuário no banco de dados
+        const user = await getUserById(id_usuario);
+        if (!user) {
+            return res.status(404).send({ message: 'Usuário não encontrado.' });
+        }
+
+        // Verificar se a senha atual está correta
+        const isPasswordValid = await bcrypt.compare(currentPassword, user.senha_hash);
+        if (!isPasswordValid) {
+            return res.status(401).send({ message: 'Senha atual incorreta.' });
+        }
+
+        // Criptografar a nova senha
+        const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+        // Atualizar a senha no banco de dados
+        await updatePassword(id_usuario, newPasswordHash);
+
+        // Registrar log de alteração de senha
+        await logAction(
+            `Senha alterada para o usuário ${id_usuario}`,
+            id_usuario,
+            'Alteração de Senha',
+            'Sucesso'
+        );
+
+        res.status(200).send({ message: 'Senha alterada com sucesso.' });
+    } catch (err) {
+        console.error('Erro ao alterar senha:', err.message);
+        res.status(500).send({ message: 'Erro ao alterar senha.' });
     }
 }

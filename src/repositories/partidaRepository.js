@@ -112,3 +112,15 @@ export async function listPartidasParticipadasByUser(id_usuario) {
     const [rows] = await connection.query(comando, [id_usuario]);
     return rows;
 }
+
+export async function listPartidasDisponiveis(id_quadra, data) {
+    const comando = `
+        SELECT 
+            p.data_horario
+        FROM tb_partidas p
+        WHERE p.id_quadra = ? AND DATE(p.data_horario) = ?;
+    `;
+    const [rows] = await connection.query(comando, [id_quadra, data]);
+    return rows;
+}
+

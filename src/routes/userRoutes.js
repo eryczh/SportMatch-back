@@ -29,9 +29,8 @@ router.put('/:id/foto', handleUpdateUserPhoto);
 
 router.get('/email/:email', handleGetUserByEmail);
 
-router.get('/email/:email', handleGetUserByCPF);
+router.get('/cpf/:cpf', handleGetUserByCPF);
 
 router.get('/usuario/buscar', handleGetUserByCpfOrEmail);
-
 
 export default router;

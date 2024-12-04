@@ -7,6 +7,7 @@ import {
     handleListPartidasByAdmin,
     handleUpdatePartidaStatus,
     handleListPartidasParticipadasByUser,
+    handleListAvailableHorarios,
 } from '../controllers/partidaController.js';
 
 const router = express.Router();
@@ -18,5 +19,7 @@ router.get('/user', handleListPartidasByUser); // Listar partidas por usuário
 router.get('/admin', handleListPartidasByAdmin); // Nova rota para administrador
 router.put('/status', handleUpdatePartidaStatus); // Nova rota para atualizar status
 router.get('/participadas/:id', handleListPartidasParticipadasByUser);
+router.post('/horarios-disponiveis', handleListAvailableHorarios);
+
 
 export default router;

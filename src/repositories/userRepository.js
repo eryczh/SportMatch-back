@@ -153,3 +153,13 @@ export async function getUserByCpfOrEmail(cpf, email) {
     const [rows] = await connection.query(comando, [encrypt(cpf), encrypt(email)]);
     return rows.length > 0; // Retorna true se encontrar algum usuário
 }
+
+// Atualizar senha de um usuário
+export async function updatePassword(userId, newPasswordHash) {
+    const comando = `
+        UPDATE tb_usuarios
+        SET senha_hash = ?
+        WHERE id_usuario = ?;
+    `;
+    await connection.query(comando, [newPasswordHash, userId]);
+}
